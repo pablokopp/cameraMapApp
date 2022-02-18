@@ -1,71 +1,54 @@
-import * as ImagePicker from 'react-native-image-picker';
-
-import {
-  Alert,
-  Button,
-  Image,
-  PermissionsAndroid,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import {Button, Image, Platform, StyleSheet, Text, View} from 'react-native';
+import {PERMISSIONS, RESULTS, request} from 'react-native-permissions';
 import React, {useState} from 'react';
 
 import {COLORS} from '../../constants/index';
+import {launchCamera} from 'react-native-image-picker';
 
-const ImageSelector = props => {
-  const [pickedUri, setPickedUri] = useState();
+const ImageSelector = ({onImage}) => {
+  const [pickedResponse, setPickedResponse] = useState();
 
-  const verifyPermission = async () => {
-    try {
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.CAMERA,
-        {
-          title: 'cameraMapApp Camera Permission',
-          message: 'cameraMapApp needs access to your camera',
-          buttonNeutral: 'Ask me later',
-          buttonNegative: 'Cancel',
-          buttonPositive: 'OK',
-        },
-      );
-      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-        return true;
-      } else {
-        return false;
-      }
-    } catch (err) {
-      console.warn(err);
+  const IS_IOS = Platform.OS === 'ios';
+
+  const handleTakePicture = async () => {
+    const options = {
+      selectionLimit: 1,
+      mediaType: 'photo',
+      includeBase64: false,
+    };
+    let granted;
+
+    //pedir permisos
+    if (IS_IOS) {
+      granted = await request(PERMISSIONS.IOS.CAMERA);
+    } else {
+      granted = await request(PERMISSIONS.ANDROID.CAMERA);
+    }
+
+    if (granted === RESULTS.GRANTED) {
+      launchCamera(options, res => {
+        if (!res.didCancel && !res.error) {
+          setPickedResponse(res.assets[0]);
+          onImage && onImage(res.assets[0].uri);
+        }
+      });
+    } else {
+      console.warn('Permission denied');
     }
   };
 
-  const handleTakeImage = async () => {
-    const isCameraOk = await verifyPermission();
-    if (!isCameraOk) return;
-
-    let options = {
-      storageOptions: {
-        skipBackup: true,
-        path: 'images',
-      },
-    };
-
-    ImagePicker.launchCamera(options, response => {
-      setPickedUri(response.assets[0].uri);
-    });
-  };
-
   return (
-    <View style={StyleSheet.container}>
+    <View style={styles.container}>
       <View style={styles.preview}>
-        {!pickedUri ? (
+        {!pickedResponse ? (
           <Text>No hay una imagen seleccionada</Text>
         ) : (
-          <Image style={styles.image} source={{uri: pickedUri}} />
+          <Image style={styles.image} source={{uri: pickedResponse.uri}} />
         )}
       </View>
       <Button
         title="Tomar foto"
-        onPress={handleTakeImage}
+        onPress={handleTakePicture}
         color={COLORS.MAROON}
       />
     </View>

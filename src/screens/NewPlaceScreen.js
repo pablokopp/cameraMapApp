@@ -16,20 +16,23 @@ import {useDispatch} from 'react-redux';
 const NewPlaceScreen = ({navigation}) => {
   const dispatch = useDispatch();
   const [title, setTitle] = useState('');
+  const [image, setImage] = useState('');
 
   const handleTitleChange = text => {
     setTitle(text);
   };
   const handleSave = () => {
-    dispatch(addPlace(title));
+    dispatch(addPlace(title, image));
     navigation.navigate('Direcciones');
   };
-
+  const handleOnImage = uri => {
+    setImage(uri);
+  };
   return (
     <ScrollView>
       <View style={styles.container}>
         <Text style={styles.label}>Titulo</Text>
-        <ImageSelector onImage={handleSave} />
+        <ImageSelector onImage={handleOnImage} />
         <TextInput
           style={styles.input}
           value={title}
