@@ -1,30 +1,32 @@
-import {FlatList} from 'react-native';
-import PlaceItem from '../components/PlaceItem/PlaceItem';
-import React from 'react';
-import {useSelector} from 'react-redux';
+import React from 'react'
+import { FlatList  } from 'react-native'
+import { useSelector } from 'react-redux'
+import PlaceItem from '../components/PlaceItem/index'
 
-const PlaceListScreen = ({navigation}) => {
-  const places = useSelector(state => state.places.places);
+const PlaceListScreen = ({ navigation }) => {
+    const places = useSelector(state => state.places.places)
+    console.warn(places)
 
-  const onSelectDetail = () => {
-    navigation.navigate('Detalle');
-  };
+    const onSelectDetail = () => {
+        navigation.navigate('Detalle')
+    }
 
-  const renderItem = ({item}) => {
-    <PlaceItem
-      title={item.title}
-      image={item.image}
-      adress="123 street, Pablovile"
-      onSelect={onSelectDetail}
-    />;
-  };
-  return (
-    <FlatList
-      data={places}
-      keyExtractor={item => item.id}
-      renderItem={renderItem}
-    />
-  );
-};
+    const renderItem = ({ item }) => (
+        <PlaceItem 
+            title={item.title}
+            image={item.image}
+            address='123 street, city, country'
+            onSelect={onSelectDetail}
+        />
+    )
 
-export default PlaceListScreen;
+    return (
+        <FlatList
+            data={places}
+            keyExtractor={(item) => item.id}
+            renderItem={renderItem}
+        />
+    )
+}
+
+export default PlaceListScreen
